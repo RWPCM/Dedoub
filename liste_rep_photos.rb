@@ -72,8 +72,8 @@ end
 #
 #écriture du répertoire analysé et du tableau de ses sous-répertoires dans un fichier texte
 def ecriture_fichier_texte(titre, rep_ana, tab_rep)
-    puts "Entrez le nom du fichier de sortie (sans extension) :"
-    filename = $stdin.gets.chomp
+    puts "Entrez le nom du fichier de sortie (sans extension) ; 'log_' sera placé en tête :"
+    filename = "log_#{$stdin.gets.chomp}"
     puts "Nous allons effacer #{filename}."
     puts "Si vous ne voulez pas l'effacer, tapez CTRL-C (^C)." # CTRL-C interrompt le programme"
     puts "Pour continuer, tapez RETURN."
@@ -139,8 +139,8 @@ end
 #
 # génère la liste des commandes "diff -q rep 1 rep 2" à exécuter manuellement par le shell
 def generate_bash_diff(rep_ana, doub_rep)
-    puts "Entrez le nom du fichier de sortie (sans extension) :"
-    filename = $stdin.gets.chomp
+    puts "Entrez le nom du fichier de sortie (sans extension) ; 'log_' sera ajouté en tête :"
+    filename = "log_#{$stdin.gets.chomp}"
     puts "Nous allons effacer #{filename}."
     puts "Si vous ne voulez pas l'effacer, tapez CTRL-C (^C)." # CTRL-C interrompt le programme"
     puts "Pour continuer, tapez RETURN."
