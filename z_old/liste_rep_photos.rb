@@ -1,72 +1,52 @@
 #!/usr/bin/env ruby
 
-# ETAPES
 
-# On part de 70 k fichiers dans n (plusieurs dizaines) répertoires
-# Objectif in fine : deux arborescences de répertoires :
-# - la première par année, et pour chaque année, un seul niveau de sous-répertoires
-# dont le titre est évocateur (lieu et/ou date et/ou thème). Dans cette arborescence ne figurent que des versions sources
-# des fichiers photo (pas de doublon)
-# - la seconde par dossiers thématiques (un seul niveau de sous-répertoires /dossiers thématiques/thème n/).
-# Chaque fichier de ces dossiers thématiques est le doublon d'un fichier source contenu dans le dossiers Années
-
-# Phase 1 : mise de côté des répertoires en doublon
-# Etape numéro 1 : lister tous les répertoires avec leur arborescence complète et leur taille totale - FAIT
-# Etape numéro 2 : détecter les répertoires potentiellement en doublon, ie dont le nombre et la taille totale des fichiers est identique - FAIT
-# Etape 2bis : générer automatiquement les commandes shell diff -q permettant de comparer les répertoires doublons (par exemple si 3 doublons, comparaison 2 avec 1 et 3 avec 1)
-# Etape 2ter (manuelle) : pour chacun des doublons, décider du nom de répertoire approprié, réduire l'arborescence le cas échéant, décider de conserver ou pas le doublon
-# les renommer "[Répertoire] - doublonné"
-# Etape numéro 3 : indexer les répertoires doublonnés, par groupes de doublons
-# Etape numéro 4 : manuellement, choisir dans chaque groupe de doublons un répertoire "source"
-# Etape numéro 5 : manuellement, insérer dans un fichier .txt dans le répertoire source le chemin
-# des répertoires en doublon du répertoire source, si cela apporte une information utile
-# Etape numéro 6 : placer les répertoires en doublon de côté, dans un répertoire "Doublons"
-
-# Phase 2 : construire l'architecture cible des répertoires
-# (sans doute à faire manuellement)
-
-# Phase 3 : dans le répertoire par années, éliminer les doublons de fichiers
-
-# ********************************************************************************************************************
-
-# CODE
 
 require 'find'
 require 'fileutils'
-require 'csv' # this class provides a complete interface to CSV files and data
+require 'csv' # This class provides a complete interface to CSV files and data
+require 'digest' # This module provides a framework for message digest libraries
 
 #
 # confirmation de l'exactitude du répertoire à traiter (fourni en premier argument)
 def confirm_rep(input_rep)
     puts "Le fichier à traiter est #{input_rep}."
-    puts "confirmez en tapant Entrée, sinon faites CTRL-C(^C) pour interrompre"
+    puts "Confirmez en tapant Entrée, sinon faites CTRL-C(^C) pour interrompre"
     
     $stdin.gets
     
 end
 
-# création du tableau arr2 avec les chemins complets des répertoires, leur nombre de fichiers et leur taille totale des fichiers
+# création du tableau liste_rep avec les chemins complets des répertoires, leur nombre de fichiers et leur taille totale des fichiers
 # à partir du tableau simple des répertoires arr1
 # rep_abs est le chemin absolu du répertoire traité
-def scan_rep(arr1, arr2, rep_abs)
-arr1.each {|d|
-    chemin = File.absolute_path(d, rep_abs) # détermination du chemin absolu du répertoire, en partant de répertoire donné en argument
-    size = 0
-    nb_fichiers = 0
-    # calcul récursif de la taille totale des fichiers du répertoire (et donc de ses sous-répertoires)
-    puts "Chemin :\n"
-    puts "#{chemin}"
-    puts "\n"
-    Find.find(chemin) {|f|
-        if !File.directory?(f) # uniquement pour les fichiers qui ne sont pas des répertoires
-        #puts "working on : #{f}"
-        size += File.size(f) if File.file?(f)
-        nb_fichiers +=1
-        end
+def scan_rep(arr, rep_abs)
+    unless arr.is_a? Array
+        raise ArgumentError,
+            "#{ arr } n'est pas un tableau."
+    end
+    
+    liste_rep = Array.new
+    
+    arr.each {|d|
+        chemin = File.absolute_path(d, rep_abs) # détermination du chemin absolu du répertoire, en partant de répertoire donné en argument
+        size = 0
+        nb_fichiers = 0
+        # calcul récursif de la taille totale des fichiers du répertoire (et donc de ses sous-répertoires)
+        puts "Chemin :\n"
+        puts "#{chemin}"
+        puts "\n"
+        Find.find(chemin) {|f|
+            if !File.directory?(f) # uniquement pour les fichiers qui ne sont pas des répertoires
+            #puts "working on : #{f}"
+            size += File.size(f) if File.file?(f)
+            nb_fichiers +=1
+            end
+        }
+        # pour chaque répertoire, assignation du chemin absolu, du nombre de fichiers, de la taille totale des fichiers
+        liste_rep << [chemin, nb_fichiers, size]
     }
-    # pour chaque répertoire, assignation du chemin absolu, du nombre de fichiers, de la taille totale des fichiers
-    arr2 << [chemin, nb_fichiers, size]
-}
+    liste_rep
 end
 
 #
@@ -97,9 +77,10 @@ def ecriture_fichier_texte(titre, rep_ana, tab_rep)
 end
 
 #
+# REFAIRE UN ALGO PLUS SIMPLE AVEC DEUX TABLEAUX DECALES 
 # détecte les doublons potentiels : les répertoires ayant des nombres de fichiers
 # et des tailles totales de fichiers identiques
-def detect_rep_doublon(tab_rep, doub_rep)
+def detect_rep_doublon(tab_rep)
    doub_rep_index_red = Array.new # tableau temporaire des index avec doublons et redondances
    doub_rep_index = Array.new # tableau temporaire des index avec doublons sans redondances
    
@@ -127,6 +108,7 @@ def detect_rep_doublon(tab_rep, doub_rep)
         end
     end
     
+    # refaire avec collect
     doub_rep_index.each { |t| # t est un tableau d'index de répertoires en doublon ["2", "3", "4"] par exemple
         doub_temp = Array.new
         t.each {|e|
@@ -134,6 +116,7 @@ def detect_rep_doublon(tab_rep, doub_rep)
             }
     doub_rep << doub_temp # ajout à doub_rep d'un tableau de doublons (tableau de tableaux) du type [["/toto", 3, 15678], ["/tata", 3, 15678]]
     }
+    doub_rep
 end
 
 #
@@ -172,17 +155,22 @@ def log_rep(filename, nb_rep, nb_doub)
     log.close
 end
 
-#
-# équivalent Ruby de shell diff - en cours - ne fonctionne pas
-def diff_reps(rep1, rep2)
-    if !rep1.exists? || !rep2.exists? 
-        puts "L'un au moins des deux repertoires n'existe pas"
-    else
-        
-    end
-    
-        #code
+# refaire avec collect
+# population du hash aller { md5fichier1: chemin complet du fichier1, md5fichier2: chemin complet du fichier2 } pour un répertoire, et du hash retour
+# rep = répertoire traité, h_aller = le hash aller, h_retour = le hash retour
+def populate_md5_hashes (rep, h_aller, h_retour)
+    rep.each {|f|
+        if f.file?            
+             md5 = Digest::MD5.file f
+             h_aller[md5] = "#{File.absolute_path(f)}"
+             h_retour["#{File.absolute_path(f)}"] = md5
+        end
+    }   
 end
+
+#
+#
+
 
 #
 # exécute les commandes diff -q et enregistre le résultat - en cours, à définir
@@ -215,7 +203,7 @@ end
 tab_rep = Array.new
 
 # sauvegarde du chemin absolu du répertoire entré comme argument, confirmation de ce répertoire
-repertoire_analyse = File.absolute_path(ARGV.first) # sauvegarde du répertoire en cours
+repertoire_analyse = File.absolute_path(ARGV.first) # sauvegarde du répertoire entré comme argument
 confirm_rep(repertoire_analyse)
 puts "Le repertoire analysé est :\n"
 puts repertoire_analyse
@@ -241,19 +229,30 @@ log_dedoub = File.new("log_dedoub", 'w')
 log_dedoub.write("\nLog du nombre de repertoires et de doublons de #{repertoire_analyse} et des operations de dedoublonnage\n")
 log_dedoub.close
 
-scan_rep(tab_rep, liste_rep, repertoire_analyse) # remplissage du tableau liste_rep
+liste_rep = scan_rep(tab_rep, repertoire_analyse) # remplissage du tableau liste_rep
 #puts "Liste remplie : #{liste_rep}"
-#detect_rep_doublon(liste_rep, doublons_rep)
-#puts "Ecriture de la liste des repertoires doublons dans un fichier texte de votre choix" ; ecriture_fichier_texte("Liste des doublons supposes", repertoire_analyse, doublons_rep)
-#puts "Ecriture de la liste des commandes shell diff dans un fichier texte de votre choix" ; generate_bash_diff(repertoire_analyse, doublons_rep)
-#puts "Enregistrement du nombre de repertoires dans le fichier log_dedoub" ; log_rep(log_dedoub, tab_rep.length, doublons_rep.length)
+doublons_rep = detect_rep_doublon(liste_rep)
+puts "Ecriture de la liste des repertoires doublons dans un fichier texte de votre choix" ; ecriture_fichier_texte("Liste des doublons supposes", repertoire_analyse, doublons_rep)
+puts "Ecriture de la liste des commandes shell diff dans un fichier texte de votre choix" ; generate_bash_diff(repertoire_analyse, doublons_rep)
+puts "Enregistrement du nombre de repertoires dans le fichier log_dedoub" ; log_rep(log_dedoub, tab_rep.length, doublons_rep.length)
 #puts "Execution des commandes diff -d" ; exec_diff(log_dedoub) # ne fonctionne pas encore, pb avec exec voir exec_diff
+
+# *********************************************************************************************
+
+# TESTS
+
+#
+# confirmation de l'exactitude du répertoire à traiter (fourni en premier argument)
+puts "Entrer un nom de répertoire : "
+filename = $stdin.gets.chomp
+confirm_rep(filename)
+
 
 
 
 # *********************************************************************************************
 
-# ROUTINES NON UTILISEES
+# PROCEDURES NON UTILISEES
 
 #
 # écriture d'un hash dans un fichier csv
@@ -267,7 +266,8 @@ def ecriture_hash_csv(h)
     $stdin.gets 
     
     puts "En cours d'ouverture ..."
-    
+ 
+ # refaire avec collect   
     target = CSV.open("#{filename}.CSV", 'w') do |csv| # Ouverture en écriture, ajout de l'extension CSV
         a = csv
         h.each {|k, v|
@@ -290,6 +290,7 @@ def ecriture_tab_csv(arr)
     
     puts "En cours d'ouverture ..."
     
+  # refaire avec collect
     target = CSV.open("#{filename}.CSV", 'w') do |csv| # Ouverture en écriture, ajout de l'extension CSV
         arr.each {|e|
             csv << e # écriture des lignes   
@@ -297,6 +298,7 @@ def ecriture_tab_csv(arr)
     end
 end
 #
+# refaire avec collect
 #routine de sortie lisible d'un tableau de tableaux de répertoires [["/toto/zozo", 3, 16578], [...]]
 def sortie_pretty(tab_rep)
     tab_rep.each { |v|

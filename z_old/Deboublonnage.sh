@@ -3,14 +3,14 @@
 # A partir d'une liste de commandes "diff -q" dans un fichier texte, les faire tourner pour faire les comparaisons entre répertoires réputés doublons
 # $1 est le fichier contenant les commandes "diff -q" générées par Ruby 
 run_diff() {
-    grep "^diff.*" "$1" > Temp/commandes_seules # sélectionne les lignes commençant par diff, les met dans le fichier commandes_seules
-    echo "Résultat des commandes diff -q\n" > resultats_diff
+    grep "^diff.*" "$1" > log_Temp/commandes_seules # sélectionne les lignes commençant par diff, les met dans le fichier commandes_seules
+    echo "Résultat des commandes diff -q\n" > log_resultats_diff
     while read line
     do
-        echo "\n" >> resultats_diff
-        eval "$line" >> resultats_diff
-        echo "\n" >> resultats_diff
-    done < Temp/commandes_seules # exécute le while pour chaque ligne de commandes_seules
+        echo "\n" >> log_resultats_diff
+        eval "$line" >> log_resultats_diff
+        echo "\n" >> log_resultats_diff
+    done < log_Temp/commandes_seules # exécute le while pour chaque ligne de commandes_seules
     echo "Terminé"
 }
 IFS="

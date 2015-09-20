@@ -1,0 +1,5 @@
+# ignore all files starting with 'log_'
+log_.*.*
+# ignore all jpg files used for test pruposes
+*.jpg
+*.JPG

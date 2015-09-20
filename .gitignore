@@ -1,0 +1,11 @@
+# ignore all files starting with 'log_'
+log_.*.*
+# ignore all jpg files used for test purposes
+*.jpg
+*.JPG
+# ignore all CR2 files used for test purposes
+*.CR2
+*.cr2
+# ignore all txt files used for test purposes
+*.txt
+*.TXT

@@ -1,0 +1,14 @@
+Liste des commandes shell diff pour verifier les repertoires doublons de /Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source
+
+diff -q "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep2/rep3/rep2/rep1/rep3" "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep2/rep1/rep3" 
+
+diff -q "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep2/rep3/rep2/rep1/rep3" "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep3/rep2/rep1/rep3" 
+
+diff -q "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep2/rep3/rep2/rep1" "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep3/rep2/rep1" 
+
+diff -q "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep2/rep3/rep2/rep1" "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep2/rep1" 
+
+diff -q "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep2/rep3/rep2" "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep3/rep2" 
+
+diff -q "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep3" "/Users/Famille/Dropbox/50-Dossier partagé Guy/Scripts pour dédoublonnage fichiers numériques/rep source/rep2/rep3" 
+
